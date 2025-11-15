@@ -12,29 +12,31 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Criar pasta de uploads caso não exista
+// Criar pasta uploads se não existir
 if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
 }
 
-// Multer para uploads PDF
+// Configuração do Multer para PDFs
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
 });
 const upload = multer({ storage });
 
-// INIT RESEND
+// Resend API
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// ------------------- ROTAS ----------------------
-
-// Teste
+// ------------------------------------------------------------
+// ROTA TESTE
+// ------------------------------------------------------------
 app.get('/', (req, res) => {
   res.send('API funcionando com Resend!');
 });
 
-// ---------------- CONTATO -----------------------
+// ------------------------------------------------------------
+// FORMULÁRIO DE CONTATO
+// ------------------------------------------------------------
 app.post('/api/contact', async (req, res) => {
   const { nome, email, mensagem } = req.body;
 
@@ -48,11 +50,38 @@ app.post('/api/contact', async (req, res) => {
       to: process.env.EMAIL_TO,
       subject: `📬 Nova mensagem de ${nome}`,
       html: `
-        <h1>Nova mensagem de contato</h1>
-        <p><strong>Nome:</strong> ${nome}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Mensagem:</strong></p>
-        <p>${mensagem.replace(/\n/g, "<br>")}</p>
+        <div style="font-family: Arial, sans-serif; background:#f5f6fa; padding: 30px;">
+          <div style="max-width:600px;margin:auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.12);">
+
+            <div style="background:#111827;padding:25px;text-align:center;border-bottom:4px solid #fbbf24;">
+              <h1 style="color:#fbbf24;margin:0;font-size:26px;">📬 Novo Contato Recebido</h1>
+              <p style="color:#e5e7eb;margin:5px 0 0;font-size:14px;">
+                Formulário de contato do site MD Terceirização
+              </p>
+            </div>
+
+            <div style="padding:30px;color:#111827;font-size:15px;line-height:1.6;">
+              <h2 style="margin-top:0;color:#1f2937;font-size:20px;">Informações do Contato</h2>
+
+              <div style="background:#fef3c7;border-left:6px solid #fbbf24;padding:15px;border-radius:6px;">
+                <p style="margin:6px 0;"><strong>👤 Nome:</strong> ${nome}</p>
+                <p style="margin:6px 0;"><strong>📧 Email:</strong> ${email}</p>
+              </div>
+
+              <h2 style="margin:25px 0 10px;color:#1f2937;font-size:20px;">Mensagem</h2>
+
+              <div style="background:#f9fafb;border:1px solid #e5e7eb;padding:20px;border-radius:8px;">
+                ${mensagem.replace(/\n/g, "<br>")}
+              </div>
+            </div>
+
+            <div style="text-align:center;background:#f3f4f6;padding:15px;color:#6b7280;font-size:13px;">
+              <p style="margin:3px 0;">Email enviado automaticamente pelo site <strong>MD Terceirização</strong>.</p>
+              <p style="margin:3px 0;">Atendimento corporativo · Profissionalismo · Segurança</p>
+            </div>
+
+          </div>
+        </div>
       `
     });
 
@@ -63,7 +92,9 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// ---------------- TRABALHE CONOSCO -----------------------
+// ------------------------------------------------------------
+// FORMULÁRIO TRABALHE CONOSCO
+// ------------------------------------------------------------
 app.post('/api/trabalheconosco', upload.single('curriculo'), async (req, res) => {
   const { nome, email, telefone } = req.body;
   const file = req.file;
@@ -80,11 +111,39 @@ app.post('/api/trabalheconosco', upload.single('curriculo'), async (req, res) =>
       to: process.env.EMAIL_TO,
       subject: `📄 Novo candidato: ${nome}`,
       html: `
-        <h1>Novo Currículo Recebido</h1>
-        <p><strong>Nome:</strong> ${nome}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Telefone:</strong> ${telefone}</p>
-        <p>O currículo segue em anexo.</p>
+        <div style="font-family: Arial, sans-serif; background:#f5f6fa; padding: 30px;">
+          <div style="max-width:600px;margin:auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.12);">
+
+            <div style="background:#111827;padding:25px;text-align:center;border-bottom:4px solid #3b82f6;">
+              <h1 style="color:#3b82f6;margin:0;font-size:26px;">📄 Novo Currículo Recebido</h1>
+              <p style="color:#e5e7eb;margin:5px 0 0;font-size:14px;">Processo seletivo MD Terceirização</p>
+            </div>
+
+            <div style="padding:30px;color:#111827;font-size:15px;line-height:1.6;">
+              <h2 style="margin-top:0;color:#1f2937;font-size:20px;">Dados do Candidato</h2>
+
+              <div style="background:#dbeafe;border-left:6px solid #3b82f6;padding:15px;border-radius:6px;">
+                <p style="margin:6px 0;"><strong>👤 Nome:</strong> ${nome}</p>
+                <p style="margin:6px 0;"><strong>📧 Email:</strong> ${email}</p>
+                <p style="margin:6px 0;"><strong>📱 Telefone:</strong> ${telefone}</p>
+              </div>
+
+              <h2 style="margin:25px 0 12px;color:#1f2937;font-size:20px;">Currículo em anexo</h2>
+
+              <div style="background:#f9fafb;border:1px solid #e5e7eb;padding:20px;border-radius:8px;">
+                ✔ O currículo em PDF foi anexado a este e-mail.<br>
+                ✔ Arquivo recebido com sucesso<br>
+                ✔ Formato: PDF
+              </div>
+            </div>
+
+            <div style="text-align:center;background:#f3f4f6;padding:15px;color:#6b7280;font-size:13px;">
+              <p style="margin:3px 0;">Mensagem enviada automaticamente pelo site <strong>MD Terceirização</strong>.</p>
+              <p style="margin:3px 0;">Profissionais qualificados · Processos seletivos</p>
+            </div>
+
+          </div>
+        </div>
       `,
       attachments: [
         {
@@ -101,8 +160,9 @@ app.post('/api/trabalheconosco', upload.single('curriculo'), async (req, res) =>
   }
 });
 
-// ----------------------------------------------
-
+// ------------------------------------------------------------
+// START SERVER
+// ------------------------------------------------------------
 app.listen(process.env.PORT || 10000, () =>
   console.log("Servidor rodando com Resend")
 );
